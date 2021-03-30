@@ -1,34 +1,42 @@
-print("assignment3")
-
-import numpy as np
 import pandas as pd
+import numpy as np
+import random as rd
+dataset = pd.read_csv('input.csv',delimiter=";", header = None)
 
+X = dataset.iloc[2:, [0, 1]].values
+rows=X.shape[0] #number of training examples
+columns=X.shape[1] #number of features. Here n=2
+n_iter=5
+einlesen = open("input.csv",encoding='utf-8-sig')
+K = einlesen.readline()
+K= K.strip()
+K = K.replace(";", "")
+K= int(K)
+Centroids=np.array([]).reshape(columns,0)
+for i in range(K):
+    rand=rd.randint(0,rows-1)
+    Centroids=np.c_[Centroids,X[rand]]
+    print("Centroids:")
+    print(Centroids)
 
-pd.set_option("display.precision", 12)
-#https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
-daten2 = pd.read_csv('input_form.csv',delimiter=";", header = None)
-print(daten2)
+for i in range(n_iter):
+    # step 2.a
+    EuclidianDistance = np.array([]).reshape(rows, 0)
+    for k in range(K):
+        tempDist = np.sum((X - Centroids[:, k]) ** 2, axis=1)
+        EuclidianDistance = np.c_[EuclidianDistance, tempDist]
+    C = np.argmin(EuclidianDistance, axis=1) + 1
+    print(EuclidianDistance)
+    # step 2.b
+    Y = {}
+    for k in range(K):
+        Y[k + 1] = np.array([]).reshape(2, 0)
+    for i in range(rows):
+        Y[C[i]] = np.c_[Y[C[i]], X[i]]
 
-#import matplotlib.pyplot as plt
-#plt.figure(0)
-#plt.scatter(daten2, daten2)
+    for k in range(K):
+        Y[k + 1] = Y[k + 1].T
 
-#aufrufen der funktion init to initialize object from class
-#source: https://github.com/python-engineer/MLfromscratch/tree/master/mlfromscratch
-class kmeansalgorithm():
-
-    def __init__(self, K=3, max_iters=100, plot_steps=False):
-        self.K = K
-        self.max_iters = max_iters
-        self.plot_steps = plot_steps
-
-        # list of sample indices for each cluster
-        self.clusters = [[] for _ in range(self.K)]
-        # the centers (mean feature vector) for each cluster: empty at the beginning
-        self.centroids = []
-
-
-#funktion um distance zu berechnen
-def manhattan_distance(x1,x2):
-    return np.sqrt(np.sum(abs(x1-x2)))
-
+    for k in range(K):
+        Centroids[:, k] = np.mean(Y[k + 1], axis=0)
+    Output = Y
